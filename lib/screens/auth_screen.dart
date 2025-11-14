@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/auth_service.dart';
+import '../services/service_locator.dart';
+
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -11,7 +13,6 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final _nameController = TextEditingController();
-  final _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +36,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.blueGrey),
               ),
-
               const SizedBox(height: 40),
-
               Card(
                 elevation: 8,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -56,7 +55,6 @@ class _AuthScreenState extends State<AuthScreen> {
                         style: TextStyle(color: Colors.grey),
                       ),
                       const SizedBox(height: 24),
-
                       TextField(
                         controller: _nameController,
                         decoration: const InputDecoration(
@@ -66,9 +64,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                         onSubmitted: (_) => _login(),
                       ),
-
                       const SizedBox(height: 24),
-
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -95,21 +91,16 @@ class _AuthScreenState extends State<AuthScreen> {
 
   void _login() {
     final name = _nameController.text.trim();
-
     if (name.isEmpty) {
       _showError('Пожалуйста, введите ваше имя');
       return;
     }
-
     if (name.length < 2) {
       _showError('Имя должно содержать минимум 2 символа');
       return;
     }
-
-    final success = _authService.login(name);
-
+    final success = locator<AuthService>().login(name);
     if (success) {
-      // Маршрутизированная навигация на главный экран
       context.go('/home');
     } else {
       _showError('Ошибка авторизации');

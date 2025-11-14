@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'services/service_locator.dart';
+import 'services/auth_service.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/workouts/workouts_screen.dart';
 import 'screens/exercises/exercises_screen.dart';
 import 'screens/progress_screen.dart';
 import 'screens/profile_screen.dart';
-import 'services/auth_service.dart';
+
 
 void main() {
+  setupLocator();
   runApp(const MyApp());
 }
 
@@ -29,7 +32,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
-final AuthService _authService = AuthService();
+
+AuthService get _authService => locator<AuthService>();
 
 final GoRouter _router = GoRouter(
   routes: [
@@ -68,7 +72,6 @@ final GoRouter _router = GoRouter(
 
 class MainAppScreen extends StatefulWidget {
   final int currentIndex;
-
   const MainAppScreen({super.key, required this.currentIndex});
 
   @override
@@ -121,7 +124,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
           setState(() {
             _currentIndex = index;
           });
-
           // Маршрутизированная навигация между основными экранами
           final routes = ['/home', '/workouts', '/exercises', '/progress', '/profile'];
           context.go(routes[index]);
