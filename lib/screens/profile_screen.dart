@@ -1,14 +1,23 @@
+// lib/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/auth_service.dart';
+import '../services/service_locator.dart'; // Импортируем locator
+// import '../services/auth_service.dart'; // Убираем, используем locator
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
-    final userName = authService.currentUserName ?? 'Пользователь';
+    String userName = 'Пользователь';
+
+    if (locator.isRegistered<AuthService>()) {
+      final authService = locator<AuthService>();
+      userName = authService.currentUserName ?? 'Пользователь';
+    } else {
+      context.go('/auth');
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Мой профиль')),
@@ -28,6 +37,7 @@ class ProfileScreen extends StatelessWidget {
                       child: Icon(Icons.person, size: 50, color: Colors.white),
                     ),
                     const SizedBox(height: 16),
+                    // Используем переменную userName, объявленную выше
                     Text(userName, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
                     const Text('Участник фитнес сообщества', style: TextStyle(fontSize: 16, color: Colors.grey)),
@@ -44,9 +54,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
-
             Card(
               elevation: 4,
               child: Column(
@@ -59,9 +67,7 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -114,9 +120,11 @@ class ProfileScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                final authService = AuthService();
-                authService.logout();
-
+                if (locator.isRegistered<AuthService>()) {
+                  locator<AuthService>().logout();
+                } else {
+                  // context.go('/auth');
+                }
                 // Маршрутизированная навигация на экран авторизации
                 context.go('/auth');
               },
