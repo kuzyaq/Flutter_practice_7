@@ -7,6 +7,7 @@ import 'screens/exercises/exercises_screen.dart';
 import 'screens/progress_screen.dart';
 import 'screens/profile_screen.dart';
 import 'services/auth_service.dart';
+import 'services/app_inherited_state.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,30 +46,44 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      builder: (context, state) => const MainAppScreen(currentIndex: 0),
+      builder: (context, state) => AppInheritedState(
+        authService: _authService,
+        child: const MainAppScreen(currentIndex: 0),
+      ),
     ),
     GoRoute(
       path: '/workouts',
-      builder: (context, state) => const MainAppScreen(currentIndex: 1),
+      builder: (context, state) => AppInheritedState(
+        authService: _authService,
+        child: const MainAppScreen(currentIndex: 1),
+      ),
     ),
     GoRoute(
       path: '/exercises',
-      builder: (context, state) => const MainAppScreen(currentIndex: 2),
+      builder: (context, state) => AppInheritedState(
+        authService: _authService,
+        child: const MainAppScreen(currentIndex: 2),
+      ),
     ),
     GoRoute(
       path: '/progress',
-      builder: (context, state) => const MainAppScreen(currentIndex: 3),
+      builder: (context, state) => AppInheritedState(
+        authService: _authService,
+        child: const MainAppScreen(currentIndex: 3),
+      ),
     ),
     GoRoute(
       path: '/profile',
-      builder: (context, state) => const MainAppScreen(currentIndex: 4),
+      builder: (context, state) => AppInheritedState(
+        authService: _authService,
+        child: const MainAppScreen(currentIndex: 4),
+      ),
     ),
   ],
 );
 
 class MainAppScreen extends StatefulWidget {
   final int currentIndex;
-
   const MainAppScreen({super.key, required this.currentIndex});
 
   @override
@@ -113,6 +128,7 @@ class _MainAppScreenState extends State<MainAppScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // AppInheritedState теперь выше в дереве для _getCurrentScreen()
     return Scaffold(
       body: _getCurrentScreen(),
       bottomNavigationBar: BottomNavigationBar(
@@ -121,7 +137,6 @@ class _MainAppScreenState extends State<MainAppScreen> {
           setState(() {
             _currentIndex = index;
           });
-
           // Маршрутизированная навигация между основными экранами
           final routes = ['/home', '/workouts', '/exercises', '/progress', '/profile'];
           context.go(routes[index]);

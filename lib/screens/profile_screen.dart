@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../services/auth_service.dart';
+import '../services/app_inherited_state.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
-    final userName = authService.currentUserName ?? 'Пользователь';
+    final appState = AppInheritedState.of(context);
+    final authService = appState?.authService;
+    final userName = authService?.currentUserName ?? 'Пользователь';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Мой профиль')),
@@ -44,9 +45,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
-
             Card(
               elevation: 4,
               child: Column(
@@ -59,9 +58,7 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -114,9 +111,10 @@ class ProfileScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                final authService = AuthService();
-                authService.logout();
-
+                // Получаем AuthService через InheritedWidget для выхода
+                final appState = AppInheritedState.of(context);
+                final authService = appState?.authService;
+                authService?.logout(); // Вызываем logout через полученный сервис
                 // Маршрутизированная навигация на экран авторизации
                 context.go('/auth');
               },

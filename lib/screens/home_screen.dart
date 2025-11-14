@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/navigation_service.dart';
 import 'workouts/workout_detail_screen.dart';
+import '../services/app_inherited_state.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final appState = AppInheritedState.of(context);
+    final authService = appState?.authService;
+    final userName = authService?.currentUserName ?? 'Пользователь';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Фитнес Трекер'),
@@ -18,7 +23,7 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildWelcomeCard(context),
+            _buildWelcomeCard(context, userName),
             const SizedBox(height: 24),
             _buildQuickStats(),
             const SizedBox(height: 24),
@@ -29,7 +34,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWelcomeCard(BuildContext context) {
+  Widget _buildWelcomeCard(BuildContext context, String userName) {
     return Card(
       elevation: 4,
       child: Padding(
@@ -38,9 +43,9 @@ class HomeScreen extends StatelessWidget {
           children: [
             const Icon(Icons.fitness_center, size: 64, color: Colors.blue),
             const SizedBox(height: 16),
-            const Text(
-              'Добро пожаловать!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              'Привет, $userName!',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
