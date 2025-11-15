@@ -1,68 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/navigation_service.dart';
 import 'workout_detail_screen.dart';
 import 'create_workout_screen.dart';
+import '../../blocs/workouts/workouts_cubit.dart';
+import '../../models/workout_model.dart';
 
 class WorkoutsScreen extends StatelessWidget {
   const WorkoutsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Мои тренировки'),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildWorkoutCard(
-            context,
-            'Утренняя зарядка',
-            '15 минут • Легкая',
-            'Начните день с энергии',
-            Icons.wb_sunny,
-            Colors.orange,
-          ),
-          _buildWorkoutCard(
-            context,
-            'Силовая тренировка',
-            '45 минут • Средняя',
-            'Укрепление мышц',
-            Icons.fitness_center,
-            Colors.red,
-          ),
-          _buildWorkoutCard(
-            context,
-            'Кардио тренировка',
-            '30 минут • Высокая',
-            'Сжигание калорий',
-            Icons.directions_run,
-            Colors.green,
-          ),
-          _buildWorkoutCard(
-            context,
-            'Йога и растяжка',
-            '20 минут • Легкая',
-            'Гибкость и релаксация',
-            Icons.self_improvement,
-            Colors.purple,
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // СТРАНИЧНАЯ НАВИГАЦИЯ - вертикальный переход к созданию тренировки
-          NavigationService.pushScreen(
-            context,
-            const CreateWorkoutScreen(),
-          );
-        },
-        child: const Icon(Icons.add),
+    return BlocProvider(
+      create: (context) => WorkoutsCubit()..fetchWorkouts(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Мои тренировки'),
+        ),
+        body: BlocBuilder<WorkoutsCubit, WorkoutsState>(
+          builder: (context, state) {
+            if (state.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: state.workouts.map((workout) => _buildWorkoutCard(
+                context,
+                workout.title,
+                '${workout.duration} • ${workout.difficulty}',
+                workout.description,
+                _getIconForWorkout(workout.title),
+                _getColorForWorkout(workout.title),
+                workout.id, // Передаем ID для удаления
+              )).toList(),
+            );
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            final createdWorkout = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CreateWorkoutScreen()),
+            );
+            if (createdWorkout != null) {
+              context.read<WorkoutsCubit>().addWorkout(createdWorkout);
+            }
+          },
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
 
-  Widget _buildWorkoutCard(BuildContext context, String title, String duration, String description, IconData icon, Color color) {
+  Widget _buildWorkoutCard(BuildContext context, String title, String duration, String description, IconData icon, Color color, String id) {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -76,7 +66,16 @@ class WorkoutsScreen extends StatelessWidget {
             Text(description, style: const TextStyle(fontSize: 12)),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) {
+            if (value == 'delete') {
+              context.read<WorkoutsCubit>().removeWorkout(id);
+            }
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(value: 'delete', child: Text('Удалить')),
+          ],
+        ),
         onTap: () {
           // СТРАНИЧНАЯ НАВИГАЦИЯ - вертикальный переход к деталям тренировки
           NavigationService.pushScreen(
@@ -91,5 +90,21 @@ class WorkoutsScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  IconData _getIconForWorkout(String title) {
+    if (title.toLowerCase().contains('зарядка')) return Icons.wb_sunny;
+    if (title.toLowerCase().contains('силовая')) return Icons.fitness_center;
+    if (title.toLowerCase().contains('кардио')) return Icons.directions_run;
+    if (title.toLowerCase().contains('йога')) return Icons.self_improvement;
+    return Icons.fitness_center;
+  }
+
+  Color _getColorForWorkout(String title) {
+    if (title.toLowerCase().contains('зарядка')) return Colors.orange;
+    if (title.toLowerCase().contains('силовая')) return Colors.red;
+    if (title.toLowerCase().contains('кардио')) return Colors.green;
+    if (title.toLowerCase().contains('йога')) return Colors.purple;
+    return Colors.blue;
   }
 }

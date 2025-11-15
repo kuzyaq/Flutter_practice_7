@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; // Добавлен импорт
 import 'package:go_router/go_router.dart';
 import 'services/service_locator.dart';
 import 'services/auth_service.dart';
@@ -8,12 +9,14 @@ import 'screens/workouts/workouts_screen.dart';
 import 'screens/exercises/exercises_screen.dart';
 import 'screens/progress_screen.dart';
 import 'screens/profile_screen.dart';
-
+import 'blocs/bloc_observer.dart';
 
 void main() {
+  Bloc.observer = AppBlocObserver(); 
   setupLocator();
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
